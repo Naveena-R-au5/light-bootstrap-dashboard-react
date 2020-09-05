@@ -15,14 +15,74 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React, { Component } from "react";
+import React, {useState,useEffect } from "react";
 import { Grid, Row, Col, Table } from "react-bootstrap";
-
 import Card from "components/Card/Card.jsx";
 import { thArray, tdArray } from "variables/Variables.jsx";
+import {Modal} from 'react-bootstrap';
+import { Button} from 'react-bootstrap'
+import {Form} from 'react-bootstrap'
 
-class TableList extends Component {
-  render() {
+const TableList=() =>{
+    const [post,setPosts] = useState("")
+    const [firstName,setName] = useState("")
+    const [s,Save] = useState("")
+    const [show, setShow] = useState(false);
+    
+
+  const handleClose = () =>setShow(false);
+  
+  const handleShow = (e) => {
+    // console.log("selected candidate id",e)
+    Save(e)
+    setShow(true)
+
+  }
+
+  // Update candidate name
+
+    const EditTable=()=>{
+  
+    fetch('http://18.188.185.178:3002/put/candidate',{
+      method:"put",
+      headers:{
+          "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        "id":s,
+      "set" :{
+		        "firstName": firstName	
+	     }
+         
+      }),
+  }).then(res=>res.json())
+  .then(result=>{
+      console.log("myupdated data",result)
+      // console.log("s",s)
+      // console.log("s",firstName)
+      setShow(false)
+      window.location.reload(true);
+      
+  })
+
+};
+
+// Get candidates data
+  
+    useEffect(()=>{
+      fetch('http://18.188.185.178:3002/get/candidate',{
+      methos:"get",
+      headers:{
+          "Content-Type":"application/json"
+      }
+  }).then(res=>res.json())
+  .then(result=>{
+      console.log("mypics",result.data)
+      setPosts(result.data)
+  })
+  }
+  ,[])
+
     return (
       <div className="content">
         <Grid fluid>
@@ -43,15 +103,38 @@ class TableList extends Component {
                       </tr>
                     </thead>
                     <tbody>
-                      {tdArray.map((prop, key) => {
+                      {post?post.map((prop, key) => {
                         return (
                           <tr key={key}>
-                            {prop.map((prop, key) => {
-                              return <td key={key}>{prop}</td>;
-                            })}
+                            
+                              <td>{prop.firstName?prop.firstName:"NA"}</td>
+                              <td>{prop.email?prop.email:"NA"}</td>
+                              <td>{prop.gender?prop.gender:"NA"}</td>
+                              <td>{prop.mobileno?prop.mobileno:"NA"}</td>
+                              <td><Button variant="primary" value={prop._id} onClick={(e)=>handleShow(e.target.value)}>
+                                    Update
+                                 </Button></td>
+                                 {/*......... Modal for updating name....... */}
+                             <Modal show={show} onHide={handleClose} style={{backgroundColor:"transparent"}}>
+                             <Modal.Header closeButton>
+                                   <Modal.Title>Update Candidate name</Modal.Title>
+                             </Modal.Header>
+
+                                <Form style={{padding:"30px"}}>
+                                  
+                          <label>Name</label>
+                         <input type="text" placeholder="Enter Name"
+                            style={{width:"100%",height:"30px",fontSize:"15px",marginBottom:"10px"}} 
+                            value ={firstName}
+                            onChange={(e)=>setName(e.target.value)}/>
+                            <Button onClick={()=>EditTable()}>save</Button>
+                     </Form>
+                      </Modal>
                           </tr>
+
                         );
-                      })}
+                        
+                      }):<h3 className="text-center">Data not found</h3>}
                     </tbody>
                   </Table>
                 }
@@ -93,7 +176,6 @@ class TableList extends Component {
         </Grid>
       </div>
     );
-  }
 }
 
 export default TableList;

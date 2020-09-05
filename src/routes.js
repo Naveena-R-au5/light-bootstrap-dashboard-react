@@ -24,6 +24,7 @@ import Maps from "views/Maps.jsx";
 import Notifications from "views/Notifications.jsx";
 import Upgrade from "views/Upgrade.jsx";
 
+
 const dashboardRoutes = [
   {
     path: "/dashboard",
@@ -46,6 +47,7 @@ const dashboardRoutes = [
     component: TableList,
     layout: "/admin"
   },
+ 
   {
     path: "/typography",
     name: "Typography",
